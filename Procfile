@@ -1,0 +1,1 @@
+web: gunicorn pp2m_project.wsgi
