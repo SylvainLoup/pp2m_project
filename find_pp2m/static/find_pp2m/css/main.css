@@ -1,0 +1,255 @@
+/* @font-face {
+  font-family: 'vagnotie';
+  src: local('Vagnotie'),
+       url('../fonts/vagnotie.ttf') format("truetype");
+}*/
+@font-face {
+  font-family: 'sacramento';
+  src: local('Sacramento'),
+       url('../fonts/sacramento.ttf') format("truetype");
+}
+@font-face {
+  font-family: 'Segoe';
+  src: local('segoeui'),
+       url('../fonts/segoeui.ttf') format("truetype");
+}
+
+body {
+  background: #F9FAFD;
+  font-family: "Segoe";
+  font-size: 100%;
+}
+
+.header {
+  padding: 20px;
+  text-align: center;
+  background: #add8e6;
+  color: #191970;
+  font-family: "Sacramento";
+  font-size: 50%;
+  border-bottom: 3px solid #191970;
+}
+
+h1 {
+    font-size: 40px;
+}
+
+h3 {
+    font-size: 10px;
+    padding: none;
+}
+
+h6 {
+  font-size: 15px;
+}
+
+input {
+  font-family: "Segoe";
+  font-size: 80%;
+  text-align: center;
+}
+
+.select2-container{
+  width: 1px;
+}
+
+input[type=number] {
+  width: 90%;
+  height: 25px;
+  margin: 2px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=text], select {
+  width: 90%;
+  height: 25px;
+  margin: 2px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  width: 100%;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;  
+}
+
+input:hover {
+  box-shadow:inset 0 0 1px 1px #b34663;
+  background: #fff;
+}
+
+input:active {
+  border: 1px solid #f5e3de;
+}
+
+.footer {
+  padding-bottom: 5px;
+  background: #e6eaf7;
+  color: #c0caea;
+  font-family: "Verdana";
+  position:absolute;
+  bottom:0;
+  width:100%;
+  font-size: 15px;
+}
+
+#box {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background: #f5e3de;
+    border: 1px solid #add8e6;
+    max-width: 800px;
+}
+
+.formbox {
+    text-align: center;
+}
+
+#submit_button {
+  background-color: #e3b1a3;
+  border: none;
+  color: #191970;
+  padding: 10px 20px;
+  font-size: 16px;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  width: 150px;
+}
+
+.remove-form-row {
+	background-color: #e26d8c;
+	border-radius:5px;
+	border:1px solid #b34663;
+	display:inline-block;
+	cursor:pointer;
+	color:#732f41;
+	font-family:Arial;
+	font-size:12px;
+	padding:0px 14px;
+	text-decoration:none;
+  height: 20px;
+  width: 40px;
+}
+.remove-form-row:hover {
+	background-color: #b34663;
+}
+.remove-form-row:active {
+	position:relative;
+	top:1px;
+}
+
+.row_button {
+	background-color: #72bcd4;
+	border-radius:5px;
+	border:1px solid #558b9d;
+	display:inline-block;
+	cursor:pointer;
+	color:#375a65;
+	font-family:Arial;
+	font-size:10px;
+	padding:3px 14px;
+	text-decoration:none;
+  height: 20px;
+  width: 40px;
+}
+.row_button:hover {
+	background-color:#558b9d;
+}
+.row_button:active {
+	position:relative;
+	top:1px;
+}
+
+#information_button {
+  background-color: #add8e6;
+  border: none;
+  color: #191970;
+  padding: 10px 16px;
+  font-size: 14px;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+}
+
+.switch_button {
+  background-color: #e3b1a3;
+  border: none;
+  color: #191970;
+  padding: 5px 15px;
+  font-size: 12px;
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+#map{
+  height:400px;
+  width:510px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.list{
+  padding-left: 30px;
+  padding-top: none;
+}
+
+.select2{
+  width: 1px;
+}
+
+.inside-box {
+  margin-left: 10%;
+  margin-right: 10%;
+  padding: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  background: #f5e3de;
+  border: 1px solid #add8e6;
+}
+
+table.resultsTable {
+  border: 2px solid #F5E3DE;
+  width: 50%;
+  text-align: center;
+  border-collapse: collapse;
+}
+table.resultsTable tr {
+  border: 1px solid #ADD8E6;
+  padding: 3px 3px;
+}
+table.resultsTable thead {
+    border-bottom: 3px solid #ADD8E6;
+}
+table.resultsTable thead th {
+  font-weight: bold;
+  text-align: center;
+}
+table.resultsTable tfoot td {
+  font-size: 14px;
+}
+
+/* 
+.class
+#id
+*/

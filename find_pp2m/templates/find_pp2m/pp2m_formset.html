@@ -1,0 +1,229 @@
+{% extends "find_pp2m/base_maps.html" %}
+{% load bootstrap %}
+{% load static %}
+
+{% block title %}The Perfect Place To Meet{% endblock %}
+
+
+{% block content %}
+    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+    {{ journey_formset.media }}
+
+
+    <div align="center" style="margin-bottom: 20px">
+        L'application pour trouver la ville idéale où se retrouver, en famille ou entre amis, quand on vient de toute la France 
+        <img src="{% static 'find_pp2m/images/btn_info.png' %}" alt="Infos" height="20px" onclick="show_hide_id('intro')" valign="middle">
+    </div>
+    <div id="intro" style="display: none;" class="inside-box" style="margin-bottom: 20px">
+        <table>
+            <tr>
+                <td align="center">
+                    Pour gagner en rapidité, les distances sont calculées depuis les préfectures et sous-préfectures rattachées aux villes françaises.
+                </td>
+            </tr>
+        </table>
+    </div>
+    <form id="form-container" method="POST">
+
+        <table width=100%><tbody>
+            <tr>
+                <td width="40%" align="center"><img src="{% static 'find_pp2m/images/icon_location.png' %}" alt="Ville" height="30px"></td>
+                <td width="20%" align="center"><img src="{% static 'find_pp2m/images/icon_people.png' %}" alt="Nb de personnes" height="30px"></td>
+                <td width="30%" align="center"><img src="{% static 'find_pp2m/images/icon_conveyance.png' %}" alt="Moyen de transport" height="30px"></td>
+                <td width="10%" align="center"></td>
+            </tr>
+        </tbody></table>
+        {% csrf_token %}
+        {{journey_formset.management_form}}
+        
+        {% for form in journey_formset %}
+            
+            <table width=100% class="form-row" id={{form.initial.id}}><tbody>  <!--id={{form.initial.id}}-->
+                <tr>
+                    <td width="40%" align="center" class="formcity">{{form.city}}</td>
+                    <td width="20%" align="center">{{form.nb_people}}</td>
+                    <td width="30%" align="center">{{form.conveyance}}</td>
+                    <td width="10%" align="center"><button class="remove-form-row">-</button></td>
+                </tr>
+                {% if form.errors %}
+                    <tr>
+                        <td width="40%" align="center">{{form.city.errors}}</td>
+                        <td width="20%" align="center">{{form.nb_people.errors}}</td>
+                        <td width="30%" align="center">{{form.conveyance.errors}}</td>
+                        <td width="10%" align="center"></td>
+                    </tr>
+                {% endif %}
+            </tbody></table>
+        {% endfor %}
+        <table id="lasttable" width=100%><tr>
+            <td width="90%" colspan="3"></td>
+            <td width="10%" align="center"><type="button" class="row_button" button id="add-form">+</button></td>
+        </tr></table>
+        <table id="params" width=100%>
+            <tr height="10px"></tr>
+            <tr>
+                <td width="5%"></td>
+                <td width="20%">Méthode de calcul</td>
+                <td width="60%">{{param_form.method}}</td>
+                <td width="15%"></td>
+            </tr>
+            <tr height="5px"></tr>
+            <tr>
+                <td width="5%"></td>
+                <td width="20%">Critère d'optimisation</td>
+                <td width="60%">{{param_form.criteria}}</td>
+                <td width="15%"><div>
+                    <img src="{% static 'find_pp2m/images/btn_info.png' %}" alt="Infos" height="20px" onclick="show_hide_id('infos')" valign="middle">
+                </div>
+                </td>
+            </tr>
+        </table>
+        <div id="infos" style="display: none;" class="inside-box">
+            <table>
+                <tr>
+                    <td width="45%" align="center" valign="top"><b>Minimiser la somme globale des déplacements</b></td>
+                    <td width="10%"></td>
+                    <td width="45%" align="center" valign="top"><b>Minimiser le trajet le plus long</b></td>
+                </tr>
+                <tr>
+                    <td width="45%" align="center" valign="top">La ville choisie réduira la somme totale des déplacements du groupe. Aussi, cette solution sera la moins chère si les frais sont partagés.</td>
+                    <td width="10%"></td>
+                    <td width="45%" align="center" valign="top">La ville choisie réduira le déplacement de la personne la plus éloignée. Ainsi, cela évite qu'un individu ait un trop long trajet à effectuer.</td>
+                </tr>
+                <tr>
+                    <td width="45%" align="center"><img src="{% static 'find_pp2m/images/img_community.png' %}" alt="Infos" height="120px"></td>
+                    <td width="10%"></td>
+                    <td width="45%" align="center"><img src="{% static 'find_pp2m/images/img_individual.png' %}" alt="Infos" height="120px"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" align="center"><b><br>Critère mixte</b></td>
+                </tr>
+                <tr>
+                    <td colspan="3" align="center">
+                        Solution rassemblant les meilleures solutions des deux autres critères d'optimisation
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <table width=100% align="center">
+            <tr>
+                {% if journey_formset.non_form_errors %}
+                    <td width=100% align="center"><br>Merci de renseigner au moins deux lignes complètes</td>
+                {% endif %}
+            </tr>
+        </table>
+        <table width=100% align="center">
+            <tr>
+                <td width=100% align="center"><input type="submit" value="Calculer" id="submit_button"/></td>
+            </tr>
+        </table>
+        
+    </form>
+
+    <script type="text/javascript">
+        window.onload = function(){
+            let formCities = document.querySelectorAll(".formcity")
+            formCities.forEach(function(formCity) {
+                for (var i = 0; i < formCity.children.length; i++) {
+                    formCity.children[i].style.width = "1px" 
+                }
+            });
+        }
+    </script>
+
+    <script>
+        let journeyForm = document.querySelectorAll(".form-row")
+        let container = document.querySelector("#form-container")
+        let lastTable = document.querySelector("#lasttable")
+        let addButton = document.querySelector("#add-form")
+        let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
+
+        let formNum = journeyForm.length-1
+        addButton.addEventListener('click', addForm)
+
+        function addForm(e){
+            e.preventDefault()
+
+            let newForm = journeyForm[0].cloneNode(true)
+            let formRegex = RegExp(`form-(\\d){1}-`,'g')
+
+            formNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
+            container.insertBefore(newForm, lastTable)
+            
+            totalForms.setAttribute('value', `${formNum+1}`) 
+
+            let oneSelect = newForm.querySelector(".select2-container")
+            oneSelect.parentNode.removeChild(oneSelect)
+            
+        }
+        
+    </script>
+
+    <script type='text/javascript'>
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+)');
+        var replacement = prefix + '-' + ndx;
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+    function cloneMore(selector, prefix) {
+        var newElement = $(selector).clone(true);
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+        newElement.find(':input').each(function() {
+            var name = $(this).attr('name').replace('-' + (total-1) + '-','-' + total + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+        });
+        newElement.find('label').each(function() {
+            var newFor = $(this).attr('for').replace('-' + (total-1) + '-','-' + total + '-');
+            $(this).attr('for', newFor);
+        });
+        total++;
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+    }
+    function deleteForm(prefix, btn) {
+        var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        if (total > 1){
+            btn.closest('.form-row').remove();
+            var forms = $('.form-row');
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            for (var i=0, formCount=forms.length; i<formCount; i++) {
+                $(forms.get(i)).find(':input').each(function() {
+                    updateElementIndex(this, prefix, i);
+                });
+            }
+        }
+        return false;
+    }
+    $(document).on('click', '.remove-form-row', function(e){
+        e.preventDefault();
+        deleteForm('form', $(this));
+        return false;
+    });
+    $('#add_more').click(function() {
+        cloneMore('.form-row:last', 'form');
+    });
+
+    function show_hide_id(id_name) {
+        if (document.getElementById(id_name).style.display == "") {
+            setTimeout(function() {
+                document.getElementById(id_name).style.display = "none";
+            }, 300);
+        } else {
+            setTimeout(function() {
+                document.getElementById(id_name).style.display = "";
+            }, 100);
+        }
+    }
+    </script>
+
+
+{% endblock %}--!>
+
+
+
+

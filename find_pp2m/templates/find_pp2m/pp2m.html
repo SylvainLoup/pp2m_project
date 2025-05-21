@@ -1,0 +1,20 @@
+{% extends "find_pp2m/base_maps.html" %}
+{% load bootstrap %}
+
+{% block content %}
+    <script type="text/javascript">
+        function add_city(click, nb_cities) {
+            nb_cities = nb_cities + 1;
+        }
+    </script>
+    <div class="form-group">
+        {% if envoi %}Votre message a bien été envoyé !{% endif %}
+        <form action="{% url 'pp2m:pp2m_root' %}" method="post">
+            {% csrf_token %}
+            {{ form2 | bootstrap_horizontal }}
+            <div class="formbox">
+                <input type="submit" value="Chercher" id="submit_button"/>
+            </div>
+        </form>
+    </div>
+{% endblock %}

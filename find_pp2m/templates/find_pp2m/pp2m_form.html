@@ -1,0 +1,207 @@
+{% extends "find_pp2m/base_maps.html" %}
+{% load bootstrap %}
+{% load static %}
+
+{% block title %}PP2M{% endblock %}
+
+
+
+{% block content %}
+    <script>
+        var nb_cities = 3
+        function get_city_slug(icity) {
+            if (icity < 10) {
+                    var str_city = "city_0" + icity;
+                } else {
+                    var str_city = "city_" + icity;
+                }
+            return str_city;
+        }
+        function hide_cities() {
+            if (nb_cities <= 2) {
+                alert("Can not find less than two cities.");
+            } else {
+                var str_city = get_city_slug(nb_cities);
+                var str_id_city = "id_" + str_city;
+                // Hide current row
+                document.getElementById(str_city).style.display = "none";
+                // Hide current row buttons
+                var hide_id = "hide_" + str_city;
+                var show_id = "show_" + str_city;
+                document.getElementById(hide_id).style.display = "none";
+                document.getElementById(show_id).style.display = "none";
+                // Erase data in current row
+                document.getElementById(str_id_city).value = "";
+                nb_cities = nb_cities - 1;
+                // Show previous row buttons
+                var str_city = get_city_slug(nb_cities);
+                var hide_id = "hide_" + str_city;
+                var show_id = "show_" + str_city;
+                document.getElementById(hide_id).style.display = "";
+                document.getElementById(show_id).style.display = "";
+            }
+        }
+        function hide_row_city(city) {
+            var str_city = city.name;
+            var city_number = parseInt(str_city.substring(5));
+            if (nb_cities <= 2) {
+                alert("Can not find less than two cities.");
+            } else {
+                // Change city values from current row to end row
+                for (let icity = city_number; icity < nb_cities + 1; icity++) {
+                    var str_id_city = "id_" + get_city_slug(icity);
+                    var str_id_next_city = "id_" + get_city_slug(icity + 1);
+                    if (icity + 1 == 21) {
+                        document.getElementById(str_id_city).value = "";
+                    } else {
+                        document.getElementById(str_id_city).value = document.getElementById(str_id_next_city).value;
+                    }
+                }
+                // Hide last row
+                var str_city = get_city_slug(nb_cities);
+                var str_id_city = "id_" + str_city;
+                // Hide current row
+                document.getElementById(str_city).style.display = "none";
+                // Hide current row show button
+                var show_id = "show_" + str_city;
+                document.getElementById(show_id).style.display = "none";
+                // Show previous row show button
+                nb_cities = nb_cities - 1;
+                var str_city = get_city_slug(nb_cities);
+                var show_id = "show_" + str_city;
+                document.getElementById(show_id).style.display = "";
+            }
+        }
+        function show_next_city() {
+            if (nb_cities >= 20) {
+                alert("Can not find more than twenty cities.");
+            } else {
+                // Hide current row buttons
+                var str_city = get_city_slug(nb_cities);
+                var show_id = "show_" + str_city;
+                document.getElementById(show_id).style.display = "none";
+                nb_cities = nb_cities + 1;
+                // Show next row
+                var str_city = get_city_slug(nb_cities);
+                document.getElementById(str_city).style.display = "";
+                // Show next row buttons
+                var hide_id = "hide_" + str_city;
+                var show_id = "show_" + str_city;
+                document.getElementById(hide_id).style.display = "";
+                document.getElementById(show_id).style.display = "";
+            }
+        }
+        function show_initial_classes() {
+            // Show first cities
+            for (let icity = 1; icity < nb_cities + 1; icity++) {
+                var str_city = get_city_slug(icity);
+                document.getElementById(str_city).style.display = "";
+            };
+            // Show method and criteria
+            document.getElementById("method").style.display = "";
+            document.getElementById("criteria").style.display = "";
+            // Show -/+ buttons for last city
+            var str_city = get_city_slug(nb_cities);
+            var hide_id = "hide_" + str_city;
+            var show_id = "show_" + str_city;
+            document.getElementById(hide_id).style.display = "";
+            document.getElementById(show_id).style.display = "";
+        }
+        function show_hide_infos() {
+            if (document.getElementById("infos").style.display == "") {
+                document.getElementById("infos").style.display = "none"
+            } else {
+                document.getElementById("infos").style.display = ""
+            }
+        }
+    </script>
+    <div class="form-group">
+        {% if envoi %}Votre message a bien été envoyé !{% endif %}
+        <form action="{% url 'pp2m:pp2m_form' %}" method="post">
+            {% csrf_token %}
+            <table width=100%><tbody>
+                {% for field in form %}
+                    {% if field.name|slice:4 == 'city' %}
+                    <tr id={{ field.name }} style="display: none;">
+                        <td width=30%>{{ field.label_tag }}</td>
+                        <td width=50%>{{ field }}</td>
+                        <td width=10% id=hide_{{ field.name }}><button type="button" onclick="hide_row_city({{ field.name }})" id="row_button">-</button></td>
+                        <td width=10% id=show_{{ field.name }} style="display: none;"><button type="button" onclick="show_next_city()" id="row_button">+</button></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                <tr height=20px ></tr>
+                <tr id={{ form.method.name }}>
+                    <td width=40%>{{ form.method.label_tag }}</td>
+                    <td width=60%>{{ form.method }}</td>
+                </tr>
+                <tr id={{ form.criteria.name }}>
+                    <td width=40%>{{ form.criteria.label_tag }}</td>
+                    <td width=60%>{{ form.criteria }}</td>
+                </tr>
+                <tr><td colspan="4" align="center"><input type="submit" value="Calculer" id="submit_button"/></td></tr>
+            </tbody></table>
+        </form>
+    </div>
+    <script>
+        // Initialisation function
+        window.onload = function(){
+            show_initial_classes();
+        }
+    </script>
+    <div>
+        <button type="button" onclick="show_hide_infos()" id="information_button">Infos</button>
+    </div>
+    <div id="infos" style="display: none;">
+        <p>Pour trouver l'endroit parfait pour se retrouver, sélectionnez les villes et appuyez sur 'Go'</p>
+        <p>Vous pouvez diminuer ou augmenter le nombre de villes avec les boutons - et +</p>
+        <p>Trois modes de calcul sont disponibles: le temps de trajet en voiture, la distance en voiture et la distance à vol d'oiseau</p>
+        <p>Le critère 'collectif' donne les résultats en sommant les déplacements de tout le monde</p>
+        <p>Le critère 'individuel' donne les résultats en prenant le déplacement le plus long pour une personne</p>
+    </div>
+
+{% endblock %}
+
+
+
+<!-- Old way with bootstrap 
+    <div class="container">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="form-group">
+                {% if envoi %}Votre message a bien été envoyé !{% endif %}
+                <form action="{% url 'pp2m:pp2m_form' %}" method="post">
+                    {% csrf_token %}
+                    <div id="city_01">{{ form.city_01 | bootstrap_horizontal }}</div>
+                    <div id="city_02">{{ form.city_02 | bootstrap_horizontal }}</div>
+                    <div id="city_03">{{ form.city_03 | bootstrap_horizontal }}</div>
+                    <div id="city_04" style="display: none;">{{ form.city_04 | bootstrap_horizontal }}</div>
+                    <div id="city_05" style="display: none;">{{ form.city_05 | bootstrap_horizontal }}</div>
+                    <div id="city_06" style="display: none;">{{ form.city_06 | bootstrap_horizontal }}</div>
+                    <div id="city_07" style="display: none;">{{ form.city_07 | bootstrap_horizontal }}</div>
+                    <div id="city_08" style="display: none;">{{ form.city_08 | bootstrap_horizontal }}</div>
+                    <div id="city_09" style="display: none;">{{ form.city_09 | bootstrap_horizontal }}</div>
+                    <div id="city_10" style="display: none;">{{ form.city_10 | bootstrap_horizontal }}</div>
+                    <div id="city_11" style="display: none;">{{ form.city_11 | bootstrap_horizontal }}</div>
+                    <div id="city_12" style="display: none;">{{ form.city_12 | bootstrap_horizontal }}</div>
+                    <div id="city_13" style="display: none;">{{ form.city_13 | bootstrap_horizontal }}</div>
+                    <div id="city_14" style="display: none;">{{ form.city_14 | bootstrap_horizontal }}</div>
+                    <div id="city_15" style="display: none;">{{ form.city_15 | bootstrap_horizontal }}</div>
+                    <div id="city_16" style="display: none;">{{ form.city_16 | bootstrap_horizontal }}</div>
+                    <div id="city_17" style="display: none;">{{ form.city_17 | bootstrap_horizontal }}</div>
+                    <div id="city_18" style="display: none;">{{ form.city_18 | bootstrap_horizontal }}</div>
+                    <div id="city_19" style="display: none;">{{ form.city_19 | bootstrap_horizontal }}</div>
+                    <div id="city_20" style="display: none;">{{ form.city_20 | bootstrap_horizontal }}</div>
+                    {{ form.method | bootstrap_horizontal }}
+                    {{ form.criteria | bootstrap_horizontal }}
+                    <input type="submit" value="Go" id="submit_button"/>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <button type="button" onclick="hide_cities()" id="submit_button">-</button>
+            <input type="reset" id="submit_button"/>
+            <button type="button" onclick="show_cities()" id="submit_button">+</button>
+        </div>
+    </div>
+!-->
+

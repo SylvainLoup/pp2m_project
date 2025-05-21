@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'dal',
     'dal_select2',
     'find_pp2m',
+    'bootstrapform',
 ]
 
 MIDDLEWARE = [

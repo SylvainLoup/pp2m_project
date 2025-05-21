@@ -1,0 +1,214 @@
+{% extends "find_pp2m/base_maps.html" %}
+
+
+{% block content %}
+    <body>
+        <!-- Javascript files -->
+        <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+                integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+                crossorigin="">
+        </script>
+        {% load static %}
+        <script type="text/javascript" src="{% static 'find_pp2m/js/map_with_weights.js' %}"></script>
+
+        <!-- Javascript variable initialization -->
+        <script type="text/javascript">
+            var initial_cities = {{ initial_cities | safe }};
+            var nbpeople = {{ nb_people | safe }};
+            var method = {{ method | safe }};
+            var criteria_ini = {{ criteria | safe }};
+
+            var results_com = {{ results_com | safe }};
+            var results_ind = {{ results_ind | safe }};
+            var results_mix = {{ results_mix | safe }};
+            
+            if (method == 'route_duration') {
+                var numformat = 2;
+                var strmethod = 'par temps en voiture';
+            } else if (method == 'route_distance') {
+                var numformat = 1;
+                var strmethod = 'par distance en voiture';
+            } else if (method == 'raw_distance') {
+                var numformat = 1;
+                var strmethod = "par distance à vol d'oiseau";
+            }
+
+            if (criteria_ini == 'community') {
+                var straverage = 'Moyenne des trajets';
+                var strcriteria = 'minimiser la somme globale des déplacements';
+            } else if (criteria_ini == 'individual') {
+                var straverage = 'Trajet le plus long';
+                var strcriteria = 'minimiser le trajet le plus long';
+            }
+
+            function writeTabResults(results, method, criteria) {
+                var wrapper = document.getElementById("TopResults");
+                var myHTML = '<thead>';
+                myHTML += '<td width="40%"><b>Ville</b></td>';
+                if (criteria == 'community') {
+                    myHTML += '<td width="20%"><b>Temps moyen</b></td>';
+                    var value_type = 'value_com';
+                } else {
+                    myHTML += '<td width="20%">Temps moyen</td>';
+                }
+                if (criteria == 'individual') {
+                    myHTML += '<td width="20%"><b>Temps maximal</b></td>';
+                    var value_type = 'value_ind';
+                } else {
+                    myHTML += '<td width="20%">Temps maximal</td>';
+                }
+                if (criteria == 'mixed') {
+                    myHTML += '<td width="20%"><b>Critère mixte calculé</b></td>';
+                    var value_type = 'value_mix';
+                } else {
+                    myHTML += '<td width="20%">Critère mixte calculé</td>';
+                }
+                myHTML += '</thead>';
+                var i = 0;
+                do {
+                    var composed_value_com = retrieveFormatedValue(results[i]["value_com"], method, 'community');
+                    var composed_value_ind = retrieveFormatedValue(results[i]["value_ind"], method, 'individual');
+                    var composed_value_mix = retrieveFormatedValue(results[i]["value_mix"], method, 'mixed');
+                    myHTML += '<tr>';
+                    myHTML += '<td align="center">' + results[i]["name"] + '</td>';
+                    myHTML += '<td align="center">' + composed_value_com + '</td>';
+                    myHTML += '<td align="center">' + composed_value_ind + '</td>';
+                    myHTML += '<td align="center">' + composed_value_mix + '</td>';
+                    i += 1;
+                } while (results[i][value_type] < results[0][value_type] * 1.15)
+                wrapper.innerHTML = myHTML;
+            }
+        </script>
+
+        <!-- Results -->
+        <div>
+            <table id="TopResults" class="resultsTable" style="max-width:600px" align="center"></table>
+        </div>
+
+        <script type="text/javascript">
+            
+        </script>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <script type="text/javascript" src="{% static 'find_pp2m/js/map_with_weights.js' %}"></script>
+        <script type="text/javascript">
+            // Get prefecture coordinates
+            var pref_lat = 46.599;
+            var pref_lon = 2.4958;
+        
+            // Initialize map centered in Null Island
+            var macarte = L.map('map').setView([pref_lat, pref_lon], 5);
+
+            function switchCriteria(initial_cities, nb_people, method, criteria, straverage, strmethod) {
+                eraseOldLayers();
+                loadData(initial_cities, nb_people, method, criteria, straverage, strmethod);
+            }
+            
+            function loadData(initial_cities, nb_people, method, criteria, straverage, strmethod) {
+                if (criteria == 'community') {
+                    var results = results_com;
+                    var straverage = 'Moyenne des trajets';
+                    document.getElementById("btn_community").style.display = "none"
+                    document.getElementById("btn_individual").style.display = ""  
+                    document.getElementById("btn_mixed").style.display = ""             
+                } else if (criteria == 'individual') {
+                    var results = results_ind;
+                    var straverage = 'Trajet le plus long';
+                    document.getElementById("btn_community").style.display = ""
+                    document.getElementById("btn_individual").style.display = "none" 
+                    document.getElementById("btn_mixed").style.display = ""      
+                } else if (criteria == 'mixed') {
+                    var results = results_mix;
+                    var straverage = 'Valeur calculée';
+                    document.getElementById("btn_community").style.display = ""
+                    document.getElementById("btn_individual").style.display = "" 
+                    document.getElementById("btn_mixed").style.display = "none"      
+                }
+                writeTabResults(results, method, criteria);
+                initMap(results, initial_cities, method, criteria);
+                writeParameters(initial_cities, nb_people, strmethod, criteria);
+            }
+
+            function eraseOldLayers() {
+                macarte.eachLayer(function (layer) {
+                    macarte.removeLayer(layer);
+                });
+            }
+
+            // Initialisation function
+            window.onload = function() {
+                loadData(initial_cities, nbpeople, method, criteria_ini, straverage, strmethod);
+            }
+        </script>
+
+        <!-- Parameters -->
+        <hr style="width:90%;height:1px;background-color:#ADD8E6"> 
+
+        <div id="InitialCitiesList" align="center"></div>
+        <script>
+            function writeParameters(initial_cities, nb_people, strmethod, criteria) {
+                var wrapper = document.getElementById("InitialCitiesList");
+                if (criteria == 'community') {
+                    var strcriteria = 'minimiser la somme globale des déplacements';
+                } else if (criteria == 'individual') {
+                    var strcriteria = 'minimiser le trajet le plus long';
+                } else if (criteria == 'mixed') {
+                    var strcriteria = 'critère mixte';
+                }
+                // Titre
+                var myHTML = '<p><b>Rappel des paramètres de calcul</b></p>';
+                // Villes de départ
+                myHTML += '<p><b>Villes de départ :</b> ';
+                for(var i = 0; i < initial_cities.length; i++) {
+                    if (initial_cities[i]["fields"]["name"] == initial_cities[i]["fields"]["pref_name"]) {
+                        myHTML += initial_cities[i]["fields"]["name"] + ' (x' + nbpeople[i].toString() + '), ';
+                    } else {
+                        myHTML += initial_cities[i]["fields"]["name"] + ' (' + initial_cities[i]["fields"]["pref_name"] +') (x' + nbpeople[i].toString() + '), ';
+                    }
+                }
+                myHTML = myHTML.substring(0, myHTML.length - 2) + '</p>';
+                // Méthode
+                myHTML += '<p><b>Méthode de calcul :</b> ' + strmethod + '</p>';
+                // Critère
+                myHTML += "<p><b>Critère d'optimisation :</b> " + strcriteria + '</p>';
+
+                wrapper.innerHTML = myHTML;
+            }
+        </script>
+
+        <table align="center">
+            <tr><td align="center" colspan="2">
+                Modifier le critère d'optimisation :
+            </td></tr>
+            <tr>
+                <td id="btn_mixed" style="display: none;">
+                    <type="button" class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'mixed', straverage, strmethod)" >
+                        Voir avec le critère mixte
+                    </button>
+                </td>
+                <td id="btn_community" style="display: none;">
+                    <type="button"  class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'community', straverage, strmethod)">
+                        Voir en minimisant la somme globale des déplacements
+                    </button>
+                </td>
+                <td id="btn_individual" style="display: none;">
+                    <type="button" class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'individual', straverage, strmethod)" >
+                        Voir en minimisant le trajet le plus long
+                    </button>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Go back -->
+        <hr style="width:90%;height:1px;background-color:#ADD8E6">
+
+        <table align="center"><tr><td align="center">
+            <type="button" class="switch_button" onclick="javascript:history.go(-1);">
+                Revenir au choix des villes
+            </type>
+        </td></tr></table>
+
+    </body>
+{% endblock %}
