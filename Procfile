@@ -1,1 +1,1 @@
-web: gunicorn pp2m_project.wsgi
+web: gunicorn config.wsgi --log-file - --env DJANGO_SETTINGS_MODULE=config.settings.prod
