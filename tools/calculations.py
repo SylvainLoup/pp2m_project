@@ -69,14 +69,17 @@ def get_cities_weightings(departure_cities_dict, method, mixed_criteria=True):
 
     # Get raw values for major cities
     columns_list = ['departure', 'arrival', 'value']
-    dep_cities_df = pd.DataFrame()
+    dep_cities_df_list = []
+    
     for (dep_city, dep_conveyance) in dep_cities_list:
         db_method = dep_conveyance + '_' + method.replace('route_', '')
         dep_city_df = pd.DataFrame.from_records(
             Journey.objects.filter(departure=dep_city).values_list('departure', 'arrival', db_method), 
             columns=columns_list
         )
-        dep_cities_df = dep_cities_df.append(dep_city_df)
+        dep_cities_df_list.append(dep_city_df)
+    
+    dep_cities_df = pd.concat(dep_cities_df_list, ignore_index=True)
 
     # Convert distance and duration in kms and hours
     if method.replace('route_', '') == 'distance':
@@ -98,15 +101,17 @@ def get_cities_weightings(departure_cities_dict, method, mixed_criteria=True):
 
     # Calculate mixed criteria
     if mixed_criteria:
-        # mix_df = pd.DataFrame((com_df['value'] - com_df['value'].min()) / (com_df['value'].max() - com_df['value'].min())) 
-        # mix_df = mix_df.append(pd.DataFrame((ind_df['value'] - ind_df['value'].min()) / (ind_df['value'].max() - ind_df['value'].min())))
-        # mix_df = pd.DataFrame(mix_df.groupby('arrival').sum()['value'])
-        # mix_df['value'] = mix_df['value'] - mix_df['value'].min() + 1
-
         # calculation modified after train_duration addition (big values for city wo station failed the values)
-        mix_df = pd.DataFrame(com_df['value'] / com_df['value'].min())
-        mix_df = mix_df.append(pd.DataFrame(ind_df['value'] / ind_df['value'].min()))
-        mix_df = pd.DataFrame(mix_df.groupby('arrival').sum()['value'])
+        com_values = com_df['value'] / com_df['value'].min()
+        ind_values = ind_df['value'] / ind_df['value'].min()
+
+        mix_df = pd.concat([
+            pd.DataFrame({'value': com_values}),
+            pd.DataFrame({'value': ind_values})
+        ])
+
+        # Agrégation, recentrage des valeurs pour éviter les 0
+        mix_df = mix_df.groupby('arrival', as_index=True).sum()
         mix_df['value'] = mix_df['value'] - mix_df['value'].min() + 1
 
     # Sort values
