@@ -32,8 +32,8 @@ class JourneyForm(forms.Form):
 
 class ParamForm(forms.Form):
     method_choices = [
-        ("route_duration", "Temps en voiture"),
-        ("route_distance", "Distance en voiture"),
+        ("route_duration", "Temps de trajet"),
+        ("route_distance", "Distance"),
         # ("raw_distance", "Distance à vol d'oiseau"),
     ]
     method = forms.CharField(widget=forms.Select(choices=method_choices),

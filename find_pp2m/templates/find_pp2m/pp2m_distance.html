@@ -25,12 +25,16 @@
             if (method == 'route_duration') {
                 var numformat = 2;
                 var strmethod = 'par temps en voiture';
+                var straveragemethod = 'Temps moyen';
+                var strmaxmethod = 'Temps maximal';
             } else if (method == 'route_distance') {
                 var numformat = 1;
                 var strmethod = 'par distance en voiture';
-            } else if (method == 'raw_distance') {
-                var numformat = 1;
-                var strmethod = "par distance à vol d'oiseau";
+                var straveragemethod = 'Distance moyenne';
+                var strmaxmethod = 'Distance maximale';
+            // } else if (method == 'raw_distance') {
+            //     var numformat = 1;
+            //     var strmethod = "par distance à vol d'oiseau";
             }
 
             if (criteria_ini == 'community') {
@@ -41,31 +45,47 @@
                 var strcriteria = 'minimiser le trajet le plus long';
             }
 
-            function writeBestResult(results, method) {
+            function writeBestResult(results, criteria, method, straveragemethod, strmaxmethod) {
                 var wrapperBest = document.getElementById("BestResult");
 
                 var myHTMLBest = '<p>Pour vous retrouver, on vous propose : <b>' + results[0]["name"] + '</b></p>';
-                myHTMLBest +=  '<p><b>Temps moyen : </b>' + retrieveFormatedValue(results[0]["value_com"], method, 'community') + '<br>';
-                myHTMLBest +=  '<b>Temps maximal : </b>' + retrieveFormatedValue(results[0]["value_ind"], method, 'individual') + '</p>';
+
+                var composed_value_com = retrieveFormatedValue(results[0]["value_com"], method, 'community');   
+                var composed_value_ind = retrieveFormatedValue(results[0]["value_ind"], method, 'individual');
+                
+                if (criteria == 'community') {
+                    myHTMLBest +=  '<p><b>' + straveragemethod + ' : </b>';
+                } else {
+                    myHTMLBest +=  '<p>' + straveragemethod + ' : ';
+                }
+                myHTMLBest += composed_value_com + '<br>';
+
+                if (criteria == 'individual') {
+                    myHTMLBest +=  '<b>' + strmaxmethod + ' : </b>'
+                } else {
+                    myHTMLBest +=  strmaxmethod + ' : '
+                }
+
+                myHTMLBest += composed_value_ind + '</p>';
                 wrapperBest.innerHTML = myHTMLBest;
             }
 
-            function writeOtherResults(results, method, criteria) {
+            function writeOtherResults(results, criteria, method, straveragemethod, strmaxmethod) {
                 var wrapperOther = document.getElementById("OtherResults");
 
                 var myHTML = '<thead>';
                 myHTML += '<td width="40%"><b>Ville</b></td>';
                 if (criteria == 'community') {
-                    myHTML += '<td width="20%"><b>Temps moyen</b></td>';
+                    myHTML += '<td width="20%"><b>' + straveragemethod + '</b></td>';
                     var value_type = 'value_com';
                 } else {
-                    myHTML += '<td width="20%">Temps moyen</td>';
+                    myHTML += '<td width="20%">' + straveragemethod + '</td>';
                 }
                 if (criteria == 'individual') {
-                    myHTML += '<td width="20%"><b>Temps maximal</b></td>';
+                    myHTML += '<td width="20%"><b>' + strmaxmethod + '</b></td>';
                     var value_type = 'value_ind';
                 } else {
-                    myHTML += '<td width="20%">Temps maximal</td>';
+                    myHTML += '<td width="20%">' + strmaxmethod + '</td>';
                 }
                 if (criteria == 'mixed') {
                     myHTML += '<td width="20%"><b>Critère mixte calculé</b></td>';
@@ -92,7 +112,7 @@
         </script>
 
         <!-- Best results  -->
-        <div id="BestResult"></div>
+        <div id="BestResult" align="center"></div>
 
 
         <!-- Map -->
@@ -107,12 +127,12 @@
             // Initialize map centered in Null Island
             var macarte = L.map('map').setView([pref_lat, pref_lon], 5);
 
-            function switchCriteria(initial_cities, nb_people, method, criteria, straverage, strmethod) {
+            function switchCriteria(initial_cities, nb_people, method, criteria, straverage, strmethod, straveragemethod, strmaxmethod) {
                 eraseOldLayers();
-                loadData(initial_cities, nb_people, method, criteria, straverage, strmethod);
+                loadData(initial_cities, nb_people, method, criteria, straverage, strmethod, straveragemethod, strmaxmethod);
             }
             
-            function loadData(initial_cities, nb_people, method, criteria, straverage, strmethod) {
+            function loadData(initial_cities, nb_people, method, criteria, straverage, strmethod, straveragemethod, strmaxmethod) {
                 if (criteria == 'community') {
                     var results = results_com;
                     var straverage = 'Moyenne des trajets';
@@ -132,8 +152,8 @@
                     document.getElementById("btn_individual").style.display = "" 
                     document.getElementById("btn_mixed").style.display = "none"      
                 }
-                writeBestResult(results, method);
-                writeOtherResults(results, method, criteria);
+                writeBestResult(results, criteria, method, straveragemethod, strmaxmethod);
+                writeOtherResults(results, criteria, method, straveragemethod, strmaxmethod);
                 initMap(results, initial_cities, method, criteria);
                 writeParameters(initial_cities, nb_people, strmethod, criteria);
             }
@@ -146,7 +166,7 @@
 
             // Initialisation function
             window.onload = function() {
-                loadData(initial_cities, nbpeople, method, criteria_ini, straverage, strmethod);
+                loadData(initial_cities, nbpeople, method, criteria_ini, straverage, strmethod, straveragemethod, strmaxmethod);
             }
         </script>
 
@@ -197,17 +217,17 @@
             </td></tr>
             <tr>
                 <td id="btn_mixed" style="display: none;">
-                    <type="button" class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'mixed', straverage, strmethod)" >
+                    <type="button" class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'mixed', straverage, strmethod, straveragemethod, strmaxmethod)" >
                         Voir avec le critère mixte
                     </button>
                 </td>
                 <td id="btn_community" style="display: none;">
-                    <type="button"  class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'community', straverage, strmethod)">
+                    <type="button"  class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'community', straverage, strmethod, straveragemethod, strmaxmethod)">
                         Voir en minimisant la somme globale des déplacements
                     </button>
                 </td>
                 <td id="btn_individual" style="display: none;">
-                    <type="button" class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'individual', straverage, strmethod)" >
+                    <type="button" class="switch_button" onclick="switchCriteria(initial_cities, nbpeople, method, 'individual', straverage, strmethod, straveragemethod, strmaxmethod)" >
                         Voir en minimisant le trajet le plus long
                     </button>
                 </td>

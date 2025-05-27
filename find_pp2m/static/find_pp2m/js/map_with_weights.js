@@ -71,9 +71,9 @@ function retrieveFormatedValue(weighting, method, criteria) {
             var value = str_hour + 'h' + str_mins;
         }
     } else if (method == 'route_distance') {
-        var value = weighting.toFixed(1) + ' km';
-    } else if (method == 'raw_distance') {
-        var value = weighting.toFixed(1) + ' km';
+        var value = weighting.toFixed(0) + ' km';
+    // } else if (method == 'raw_distance') {
+    //     var value = weighting.toFixed(1) + ' km';
     }
 
     return value;
