@@ -41,8 +41,18 @@
                 var strcriteria = 'minimiser le trajet le plus long';
             }
 
-            function writeTabResults(results, method, criteria) {
-                var wrapper = document.getElementById("TopResults");
+            function writeBestResult(results, method) {
+                var wrapperBest = document.getElementById("BestResult");
+
+                var myHTMLBest = '<p>Pour vous retrouver, on vous propose : <b>' + results[0]["name"] + '</b></p>';
+                myHTMLBest +=  '<p><b>Temps moyen : </b>' + retrieveFormatedValue(results[0]["value_com"], method, 'community') + '<br>';
+                myHTMLBest +=  '<b>Temps maximal : </b>' + retrieveFormatedValue(results[0]["value_ind"], method, 'individual') + '</p>';
+                wrapperBest.innerHTML = myHTMLBest;
+            }
+
+            function writeOtherResults(results, method, criteria) {
+                var wrapperOther = document.getElementById("OtherResults");
+
                 var myHTML = '<thead>';
                 myHTML += '<td width="40%"><b>Ville</b></td>';
                 if (criteria == 'community') {
@@ -64,7 +74,8 @@
                     myHTML += '<td width="20%">Critère mixte calculé</td>';
                 }
                 myHTML += '</thead>';
-                var i = 0;
+
+                var i = 1;
                 do {
                     var composed_value_com = retrieveFormatedValue(results[i]["value_com"], method, 'community');
                     var composed_value_ind = retrieveFormatedValue(results[i]["value_ind"], method, 'individual');
@@ -75,19 +86,14 @@
                     myHTML += '<td align="center">' + composed_value_ind + '</td>';
                     myHTML += '<td align="center">' + composed_value_mix + '</td>';
                     i += 1;
-                } while (results[i][value_type] < results[0][value_type] * 1.15)
-                wrapper.innerHTML = myHTML;
+                } while (results[i][value_type] < results[0][value_type] * 1.2 & i < 6)
+                wrapperOther.innerHTML = myHTML;
             }
         </script>
 
-        <!-- Results -->
-        <div>
-            <table id="TopResults" class="resultsTable" style="max-width:600px" align="center"></table>
-        </div>
+        <!-- Best results  -->
+        <div id="BestResult"></div>
 
-        <script type="text/javascript">
-            
-        </script>
 
         <!-- Map -->
         <div id="map"></div>
@@ -126,7 +132,8 @@
                     document.getElementById("btn_individual").style.display = "" 
                     document.getElementById("btn_mixed").style.display = "none"      
                 }
-                writeTabResults(results, method, criteria);
+                writeBestResult(results, method);
+                writeOtherResults(results, method, criteria);
                 initMap(results, initial_cities, method, criteria);
                 writeParameters(initial_cities, nb_people, strmethod, criteria);
             }
@@ -142,6 +149,12 @@
                 loadData(initial_cities, nbpeople, method, criteria_ini, straverage, strmethod);
             }
         </script>
+
+        <!-- Other results -->
+        <p>D'autres villes s'offrent à vous :</p>
+        <div>
+            <table id="OtherResults" class="resultsTable" style="max-width:600px" align="center"></table>
+        </div>
 
         <!-- Parameters -->
         <hr style="width:90%;height:1px;background-color:#ADD8E6"> 
